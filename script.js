@@ -1,4 +1,4 @@
-const apiKey = "3f250e6671872e4d7d4aa89b826d875d";
+const apiKey = "97571d5097118f221639e9794f1a7f84";
 const cityId = 82; //Lisbon
 const cuisineId = 83; //Seafood
 const url = `https://developers.zomato.com/api/v2.1/search?entity_id=${cityId}&entity_type=city&cuisines=${cuisineId}`;
@@ -8,6 +8,12 @@ const priceMedium = document.getElementById("mediumPrice");
 const priceHigh = document.getElementById("highPrice");
 const buttonFilter = document.getElementById("filterButton");
 const ratingButton = document.getElementById("rating-button");
+const ratingButtonImage = document.getElementById("thumbs");
+
+//Image turns upsidedown when clicked
+const toggleImage = () => {
+  ratingButtonImage.classList.toggle("turn");
+};
 
 //Choosing euro sign/-s from average cost
 const priceSymbol = cost => {
@@ -39,16 +45,14 @@ const smileIcon = ratingScore => {
 };
 
 //Show if table booking is available or not
-const bookTable = "Book";
 const noTableBooking = "";
 
 const tableBooking = booking => {
   if (booking === 1) {
-    booking = bookTable;
+    return `<button class="booking-button" id="booking-button">BOOK</button>`;
   } else {
-    booking = noTableBooking;
+    return noTableBooking;
   }
-  return booking;
 };
 
 //Fetches data from API
@@ -76,9 +80,7 @@ fetch(url, {
         <h3>${resto.restaurant.name}</h3> 
         <div class="b-a-container">
         <p class="address">${resto.restaurant.location.address}</p>
-        <button class="booking-button" id="booking-button">${tableBooking(
-          resto.restaurant.has_table_booking
-        )}</button>
+        ${tableBooking(resto.restaurant.has_table_booking)}
         </div>
         <br>
         <p class="average-cost">${priceSymbol(
@@ -110,19 +112,37 @@ fetch(url, {
       showRestaurants();
     };
 
+    let order = "low";
+
     //sort restaurants by aggregated rating
     const sortByRating = () => {
-      filteredList.sort(
-        (a, b) =>
-          b.restaurant.user_rating.aggregate_rating -
-          a.restaurant.user_rating.aggregate_rating
-      );
+      if (order === "low") {
+        order = "high";
+      } else {
+        order = "low";
+      }
+
+      if (order === "low") {
+        filteredList.sort(
+          (a, b) =>
+            b.restaurant.user_rating.aggregate_rating -
+            a.restaurant.user_rating.aggregate_rating
+        );
+      } else {
+        filteredList.sort(
+          (a, b) =>
+            a.restaurant.user_rating.aggregate_rating -
+            b.restaurant.user_rating.aggregate_rating
+        );
+      }
+
       showRestaurants();
     };
 
     //buttons to call filter and sort functions
     buttonFilter.addEventListener("click", filterPrice);
     ratingButton.addEventListener("click", sortByRating);
+    ratingButton.addEventListener("click", toggleImage);
 
     showRestaurants();
   });
